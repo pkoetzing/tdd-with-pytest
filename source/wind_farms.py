@@ -1,3 +1,7 @@
+import csv
+from source.external_dependency import magic_full_load_hours
+
+
 class WindFarms:
 
     def __init__(self):
@@ -43,3 +47,17 @@ class WindFarms:
                 self.count -= 1
                 return
         raise ValueError(f'Unknown wind farm {name}')
+
+    def to_csv(self, filename: str):
+        with open(filename, 'w', newline='') as csvfile:
+            writer = csv.DictWriter(
+                csvfile, fieldnames=self.parameter)
+            writer.writeheader()
+            for item in self.data:
+                writer.writerow(item)
+
+    def forecast_production(self):
+        for item in self.data:
+            flh = magic_full_load_hours(
+                item['Country'], item['Commissioning Year'])
+            item['Annual Production GWh'] = flh * item['Capacity MW'] / 1000

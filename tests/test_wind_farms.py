@@ -1,4 +1,5 @@
 import pytest
+from pathlib import Path
 
 from source.wind_farms import WindFarms
 
@@ -95,3 +96,23 @@ def test_remove_existing_farm(two_farms):
 def test_remove_unknown_farm(two_farms):
     with pytest.raises(ValueError):
         two_farms.remove('Aberdeen Bay')
+
+
+def test_to_csv(two_farms, tmpdir):
+    # build-in pytest fixture tmpdir
+    filename = Path(tmpdir, 'WindFarms.csv')
+    two_farms.to_csv(filename)
+    assert filename.exists()
+
+
+def test_forcast_production(two_farms, monkeypatch):
+    # build-in pytest fixture monkeypatch
+    def flh_mock(country, year):
+        return 2500
+    monkeypatch.setattr(
+        'source.wind_farms.magic_full_load_hours', flh_mock)
+    two_farms.forecast_production()
+    assert two_farms.get_parameter(
+        'DanTysk', 'Annual Production GWh') == 720
+    assert two_farms.get_parameter(
+        'Horns Rev 3', 'Annual Production GWh') == 1017.5
