@@ -107,12 +107,12 @@ def test_to_csv(two_farms, tmpdir):
 
 def test_forcast_production(two_farms, monkeypatch):
     # build-in pytest fixture monkeypatch
-    def flh_mock(country, year):
-        return 2500
+    def mock_flh(country, year):
+        return 2000
     monkeypatch.setattr(
-        'source.wind_farms.magic_full_load_hours', flh_mock)
+        'source.wind_farms.magic_full_load_hours', mock_flh)
     two_farms.forecast_production()
     assert two_farms.get_parameter(
-        'DanTysk', 'Annual Production GWh') == 720
+        'DanTysk', 'Annual Production GWh') == 576
     assert two_farms.get_parameter(
-        'Horns Rev 3', 'Annual Production GWh') == 1017.5
+        'Horns Rev 3', 'Annual Production GWh') == 814
