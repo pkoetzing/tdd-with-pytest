@@ -1,0 +1,9 @@
+name: null
+dependencies:
+- pytest
+- flake8
+- mypy
+- ipykernel
+- pip
+- pip:
+  - --editable .

@@ -105,6 +105,19 @@ def test_to_csv(two_farms, tmpdir):
     assert filename.exists()
 
 
+def test_to_csv_missing_parameter(two_farms, tmpdir):
+    # build-in pytest fixture tmpdir
+    filename = Path(tmpdir, 'WindFarms.csv')
+    two_farms.add({
+        'Name': 'Hollandse Kust Zuid',
+        'Capacity MW': 760
+    })
+    assert not two_farms.get_parameter(
+        'Hollandse Kust Zuid', 'Country')
+    two_farms.to_csv(filename)
+    assert filename.exists()
+
+
 def test_forcast_production(two_farms, monkeypatch):
     # build-in pytest fixture monkeypatch
     def mock_flh(country, year):
