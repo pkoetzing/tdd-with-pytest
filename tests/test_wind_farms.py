@@ -21,6 +21,7 @@ def test_add_first_farm():
     assert farms.count == 1
 
 
+# user defined fixture:
 @pytest.fixture
 def two_farms():
     farms = WindFarms()
