@@ -4,41 +4,39 @@ from pathlib import Path
 from source.wind_farms import WindFarms
 
 
-@pytest.fixture
-def empty_farms():
-    return WindFarms()
+def test_properties():
+    farms = WindFarms()
+    assert farms.count == 0
+    assert 'Country' in farms.parameter
 
 
-@pytest.fixture
-def two_farms(empty_farms):
-    empty_farms.add({
+def test_add_first_farm():
+    farms = WindFarms()
+    farms.add({
         'Name': 'DanTysk',
         'Country': 'Germany',
         'Commissioning Year': 2014,
         'Capacity MW': 288
     })
-    empty_farms.add({
+    assert farms.count == 1
+
+
+@pytest.fixture
+def two_farms():
+    farms = WindFarms()
+    farms.add({
+        'Name': 'DanTysk',
+        'Country': 'Germany',
+        'Commissioning Year': 2014,
+        'Capacity MW': 288
+    })
+    farms.add({
         'Name': 'Horns Rev 3',
         'Country': 'Denmark',
         'Commissioning Year': 2019,
         'Capacity MW': 407
     })
-    return empty_farms
-
-
-def test_properties(empty_farms):
-    assert empty_farms.count == 0
-    assert 'Country' in empty_farms.parameter
-
-
-def test_add_first_farm(empty_farms):
-    empty_farms.add({
-        'Name': 'DanTysk',
-        'Country': 'Germany',
-        'Commissioning Year': 2014,
-        'Capacity MW': 288
-    })
-    assert empty_farms.count == 1
+    return farms
 
 
 def test_get_farm_parameter(two_farms):
@@ -98,15 +96,14 @@ def test_remove_unknown_farm(two_farms):
         two_farms.remove('Aberdeen Bay')
 
 
+# showcase build-in pytest fixture `tmpdir`
 def test_to_csv(two_farms, tmpdir):
-    # build-in pytest fixture tmpdir
     filename = Path(tmpdir, 'WindFarms.csv')
     two_farms.to_csv(filename)
     assert filename.exists()
 
 
 def test_to_csv_missing_parameter(two_farms, tmpdir):
-    # build-in pytest fixture tmpdir
     filename = Path(tmpdir, 'WindFarms.csv')
     two_farms.add({
         'Name': 'Hollandse Kust Zuid',
@@ -118,8 +115,8 @@ def test_to_csv_missing_parameter(two_farms, tmpdir):
     assert filename.exists()
 
 
+# showcase build-in pytest fixture monkeypatch
 def test_forcast_production(two_farms, monkeypatch):
-    # build-in pytest fixture monkeypatch
     def mock_flh(country, year):
         return 2000
     monkeypatch.setattr(

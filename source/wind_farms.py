@@ -11,14 +11,22 @@ class WindFarms:
             'Capacity MW', 'Annual Production GWh']
         self.count = 0
 
-    def add(self, farm: dict):
-        for item in self.data:
-            if item['Name'] == farm['Name']:
-                raise ValueError(
-                    f'Wind farm {farm["Name"]} already exists!')
+    def _index(self, name: str):
+        for index, item in enumerate(self.data):
+            if item['Name'] == name:
+                return index
+        return None
+
+    def _validate(self, farm: dict):
         for key in farm.keys():
             if key not in self.parameter:
                 raise KeyError(f'Unknown key {key}')
+
+    def add(self, farm: dict):
+        if self._index(farm['Name']):
+            raise ValueError(
+                f"Wind farm {farm['Name']} already exists!")
+        self._validate(farm)
         self.data.append(farm)
         self.count += 1
 
@@ -31,21 +39,19 @@ class WindFarms:
                     return item.get(parameter, None)
 
     def update(self, farm: dict):
-        for key in farm.keys():
-            if key not in self.parameter:
-                raise KeyError(f'Unknown key {key}')
-        for index, item in enumerate(self.data):
-            if item['Name'] == farm['Name']:
-                self.data[index] = {**self.data[index], **farm}
-                return
-        raise ValueError(f'Unknown wind farm {farm["Name"]}')
+        self._validate(farm)
+        index = self._index(farm['name'])
+        if index is not None:
+            self.data[index] = {**self.data[index], **farm}
+        else:
+            raise ValueError(f"Unknown wind farm {farm['Name']}")
 
     def remove(self, name: str):
-        for index, item in enumerate(self.data):
-            if item['Name'] == name:
-                del self.data[index]
-                self.count -= 1
-                return
+        index = self._index(name)
+        if index is not None:
+            del self.data[index]
+            self.count -= 1
+            return
         raise ValueError(f'Unknown wind farm {name}')
 
     def to_csv(self, filename: str):
@@ -60,4 +66,5 @@ class WindFarms:
         for item in self.data:
             flh = magic_full_load_hours(
                 item['Country'], item['Commissioning Year'])
-            item['Annual Production GWh'] = flh * item['Capacity MW'] / 1000
+            item['Annual Production GWh'] = (
+                flh * item['Capacity MW'] / 1000)
