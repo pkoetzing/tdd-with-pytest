@@ -5,6 +5,11 @@ from source.external_dependency import magic_full_load_hours
 class WindFarms:
 
     def __init__(self):
+        """
+        Wind farm data is stored as a list of dictonaries,
+        with keys as defined in the parameters attribute.
+        The 'Name' key of the dict serves as the identifier.
+        """
         self.data = list()
         self.parameter = [
             'Name', 'Country', 'Commissioning Year',
@@ -12,17 +17,30 @@ class WindFarms:
         self.count = 0
 
     def _index(self, name: str):
+        """
+        Get list index of dictionary containing 'name'
+        in the 'Name' key.
+        """
         for index, item in enumerate(self.data):
             if item['Name'] == name:
                 return index
         return None
 
     def _validate(self, farm: dict):
+        """
+        Check if provided dictonary key
+        is in the predefined parameter list.
+
+        """
         for key in farm.keys():
             if key not in self.parameter:
                 raise KeyError(f'Unknown key {key}')
 
     def add(self, farm: dict):
+        """
+        Add dictionary to data list.
+
+        """
         if self._index(farm['Name']):
             raise ValueError(
                 f"Wind farm {farm['Name']} already exists!")
@@ -40,7 +58,7 @@ class WindFarms:
 
     def update(self, farm: dict):
         self._validate(farm)
-        index = self._index(farm['name'])
+        index = self._index(farm['Name'])
         if index is not None:
             self.data[index] = {**self.data[index], **farm}
         else:
@@ -63,6 +81,9 @@ class WindFarms:
                 writer.writerow(item)
 
     def forecast_production(self):
+        """
+        magic_full_load_hours will raise an exception in any case.
+        """
         for item in self.data:
             flh = magic_full_load_hours(
                 item['Country'], item['Commissioning Year'])

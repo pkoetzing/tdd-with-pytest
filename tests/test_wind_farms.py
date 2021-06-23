@@ -6,6 +6,9 @@ from source.wind_farms import WindFarms
 
 def test_properties():
     farms = WindFarms()
+    assert isinstance(farms, WindFarms)
+    assert isinstance(farms.data, list)
+    assert not farms.data
     assert farms.count == 0
     assert 'Country' in farms.parameter
 
@@ -18,6 +21,7 @@ def test_add_first_farm():
         'Commissioning Year': 2014,
         'Capacity MW': 288
     })
+    assert isinstance(farms.data[0], dict)
     assert farms.count == 1
 
 
@@ -58,6 +62,11 @@ def test_add_new_farm(two_farms):
 
 
 def test_add_existing_farm(two_farms):
+    """
+    Should raise an error since 'Horns Rev 3'
+    is included in two_farms already.
+
+    """
     with pytest.raises(ValueError):
         two_farms.add({
             'Name': 'Horns Rev 3',
@@ -80,7 +89,7 @@ def test_update_existing_farm(two_farms):
 
 
 def test_update_unknown_farm(two_farms):
-    with pytest.raises(ValueError):
+    with pytest.raises(KeyError):
         two_farms.update({
             'Name': 'Aberdeen Bay',
             'Annual Production GWh': 600
@@ -98,13 +107,21 @@ def test_remove_unknown_farm(two_farms):
 
 
 # showcase build-in pytest fixture `tmpdir`
-def test_to_csv(two_farms, tmpdir):
+def test_to_csv(two_farms, tmpdir, capsys):
+    """
+    tmpdir is located in AppData/Local/Temp/pytest-of-user
+    """
     filename = Path(tmpdir, 'WindFarms.csv')
+    with capsys.disabled():
+        print(f'\n\nWriting test output to {filename}')
     two_farms.to_csv(filename)
     assert filename.exists()
 
 
-def test_to_csv_missing_parameter(two_farms, tmpdir):
+def test_to_csv_missing_parameter(two_farms, tmpdir, capsys):
+    """
+    tmpdir is located in AppData/Local/Temp/pytest-of-user
+    """
     filename = Path(tmpdir, 'WindFarms.csv')
     two_farms.add({
         'Name': 'Hollandse Kust Zuid',
@@ -112,6 +129,8 @@ def test_to_csv_missing_parameter(two_farms, tmpdir):
     })
     assert not two_farms.get_parameter(
         'Hollandse Kust Zuid', 'Country')
+    with capsys.disabled():
+        print(f'\n\nWriting test output to {filename}')
     two_farms.to_csv(filename)
     assert filename.exists()
 
